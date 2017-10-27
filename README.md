@@ -20,8 +20,8 @@ Now, you will get **KEY** and **SECRET**, Copy them and Store it at safe place a
 * Install **Ruby** on your machine as script is written in ruby language.
 
 
-* Go To my Github Repo, Download/ Clone It: [pump and dump bot](https://github.com/aqfaridi/pump_and_dump_bot)
-   `git clone git@github.com:aqfaridi/pump_and_dump_bot.git`
+* Go To my Github Repo, Download/ Clone It: [pump and dump bot](https://github.com/cas8180/pump_and_dump_bot)
+   `git clone git@github.com:cas8180/pump_and_dump_bot.git`
 
 * Navigate to the folder in your local machine, Edit **API_KEY** and **API_SECRET** in **bittrex_bot.rb** with your KEY and SECRET as generated above.
 
