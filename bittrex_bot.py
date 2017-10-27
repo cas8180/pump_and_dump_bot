@@ -4,7 +4,8 @@ import hashlib
 import hmac
 import base64
 from colorama import Fore, Back, Style, init
-from time import time
+import time
+import datetime
 
 init()
 
@@ -71,7 +72,7 @@ def get_url(api_type, **params):
     elif params["action"] == "order_book":
         url = url % (params["market"], params["order_type"], params["depth"])
 
-    nonce = time()
+    nonce = datetime.datetime.now()
     # +" if ["market", "account"]params[:api_type]
     if str(api_type.__name__) =="URI_market" or str(api_type.__name__) == "URI_account":
           if "?" not in url:
@@ -115,7 +116,7 @@ def cancel_all_bot():
     base_currency = market["BaseCurrency"]
     global market_name
     market_name = market["MarketName"]
-    if market["IsActive"] and base_currency == "BTC":
+    if market["IsActive"] and base_currency == "BTC" or base_currency == "ETH":
       open_orders_url = get_url(URI_market, action = "open_orders", market = market_name)
       open_orders = call_secret_api(open_orders_url)
       if open_orders.size > 0:
@@ -138,7 +139,7 @@ def sell_all_bot(profit_rate = 0.2):
     base_currency = market["BaseCurrency"]
     global market_name
     market_name = market["MarketName"]
-    if market["IsActive"] and base_currency == "BTC":
+    if market["IsActive"] and base_currency == "BTC" or base_currency== "ETH":
       get_balance_url = get_url(URI_account, action = "currency_balance", currency = currency)
       balance_details = call_secret_api(get_balance_url)
       if balance_details["Available"] and balance_details["Available"] > 0.0: #purchased coins
@@ -146,8 +147,8 @@ def sell_all_bot(profit_rate = 0.2):
         orders_history = call_secret_api(orders_history_url)
         net_value = 0.0
         for order in orders_history:
-          net_value += order["Price"] if order["OrderType"] == "LIMIT_BUY" else 0
-          net_value -= order["Price"] if order["OrderType"] == "LIMIT_SELL" else 0
+          if order["OrderType"] == "LIMIT_BUY" : net_value += order["Price"]  
+          if order["OrderType"] == "LIMIT_SELL": net_value -= order["Price"]
 
         if net_value > 0: # buys are more, we need to get more than this net value by selling available coins
           sell_price = (net_value + net_value*profit_rate)/balance_details["Available"]
@@ -156,7 +157,7 @@ def sell_all_bot(profit_rate = 0.2):
           order_placed = call_secret_api(sell_limit_url)
           print order_placed, "for #%s at #%s" %(market_name,sell_price)
         expected_worth += (net_value + net_value*profit_rate)
-  print("Expected Worth=" +  expected_worth)
+  print("Expected Worth=" +  str(expected_worth))
 
 def get_market_summary(market_name):
   market_summary_url = get_url(URI_public, action = "market_day_summary", market = market_name)
@@ -174,7 +175,7 @@ def buy_chunk(last_price, market_name, percent_increase, chunk):
   cnt = 1
   while cnt <= 3 and  order is not None and order["uuid"] is not None: #retry
     print Fore.YELLOW + "Retry #{cnt}: Purchasing coin..." + Fore.WHITE
-    sleep(1) # half second
+    time.sleep(.5) # half second
     order = call_secret_api(buy_limit_url)
     print Fore.GREEN + "Success" if order is not None and order["uuid"] is not None else Fore.RED + "Fail"
     cnt += 1
@@ -205,14 +206,14 @@ def buy_bot(percent_increase = 0.05, chunk = 0.006, prepump_buffer = 0.5):
 # prepump_buffer(float) -  Allowed buffer for prepump
 def buy_all_bot(percent_increase = 0.05, chunk = 0.006, prepump_buffer = 0.5):
   markets_url = get_url(URI_public, action = "markets")
-  markets = call_api(markets_url)
+  markets = filter(lambda x : x["BaseCurrency"] == market_name.split("-")[0],call_api(markets_url))
   global currency
   global market_name
   for market in markets:
     currency = market["MarketCurrency"]
     base_currency = market["BaseCurrency"]
     market_name = market["MarketName"]
-    if market["IsActive"] and base_currency == "BTC":
+    if market["IsActive"] and base_currency == "BTC" or base_currency == "ETH":
       market_name = market_name
       buy_bot(percent_increase, chunk, prepump_buffer)
 
@@ -239,7 +240,7 @@ def sell_bot(percent_decrease = 0.1):
     cnt = 1
     while cnt <= 3 and order_placed and order_placed["uuid"] is None: #retry
       print Fore.YELLOW, "Retry #{cnt} : Selling coin..."
-      sleep(1) # half second
+      time.sleep(.5) # half second
       order_placed = call_secret_api(sell_limit_url)
       print Fore.GREEN + "Success" if order_placed and order_placed["uuid"] is not None else Fore.RED + "Failed"
       cnt += 1
@@ -286,7 +287,7 @@ def buy_sell_bot(percent_increase = 0.05, chunk = 0.004, prepump_buffer = 0.5, p
           cnt = 1
           while cnt <= 3 and order_placed and order_placed["uuid"] is None: #retry
             print Fore.YELLOW,"Retry #{cnt} : Selling coin..."
-            sleep(1) # half second
+            time.sleep(.5) # half second
             order_placed = call_secret_api(sell_limit_url)
             print Fore.GREEN + "Success" if(order_placed and order_placed["uuid"] is not None) else Fore.RED + "Failed"
             cnt += 1
@@ -294,7 +295,7 @@ def buy_sell_bot(percent_increase = 0.05, chunk = 0.004, prepump_buffer = 0.5, p
           print order_placed, "Sell #{%s} of #{%s} at #{%s}" %(qty,market_name,sell_price)
         break
       counter += 1
-      sleep(0.5)
+      time.sleep(0.5)
 
 # method to place SELL order by cancelling all open orders
 # params:

@@ -18,6 +18,7 @@ Now, you will get **KEY** and **SECRET**, Copy them and Store it at safe place a
 
 * Git (optional if you don't want to contribute, just download  the repo from github)
 * Install **python** on your machine as script is written in python language.
+* https://www.python.org/downloads/ **Tested with 2.7.X
 
 
 * Go To my Github Repo, Download/ Clone It: [pump and dump bot](https://github.com/cas8180/pump_and_dump_bot)
