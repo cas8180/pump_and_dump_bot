@@ -17,13 +17,13 @@ Now, you will get **KEY** and **SECRET**, Copy them and Store it at safe place a
 **Pre-requisites:**
 
 * Git (optional if you don't want to contribute, just download  the repo from github)
-* Install **Ruby** on your machine as script is written in ruby language.
+* Install **python** on your machine as script is written in python language.
 
 
 * Go To my Github Repo, Download/ Clone It: [pump and dump bot](https://github.com/cas8180/pump_and_dump_bot)
    `git clone git@github.com:cas8180/pump_and_dump_bot.git`
 
-* Navigate to the folder in your local machine, Edit **API_KEY** and **API_SECRET** in **bittrex_bot.rb** with your KEY and SECRET as generated above.
+* Navigate to the folder in your local machine, Edit **API_KEY** and **API_SECRET** in **bittrex_bot.py** with your KEY and SECRET as generated above.
 
   ```
   API_KEY = "<YOUR_API_KEY>"
@@ -33,35 +33,35 @@ Now, you will get **KEY** and **SECRET**, Copy them and Store it at safe place a
 * Run the **bot script** using following command in terminal/ command prompt: 
 
 ```
-ruby bittrex_bot.rb "COIN_CODE", "BOT_TYPE"
+python bittrex_bot.py "COIN_CODE", "BOT_TYPE"
 ```
 
 There are seven types of BOT as follows: 
 
 1. **BUY BOT** which purchase the coin, taking care of coin not being prepumped, BOT_TYPE=1
-      e.g For Siacoin(SC), Run like this : `ruby bittrex_bot.rb "SC" "1"`
+      e.g For Siacoin(SC), Run like this : `python bittrex_bot.py "SC" "1"`
 
 2. **SELL BOT** which place sell order at given percent decrease as compared to last price of the market , BOT_TYPE=2
-      e.g For Siacoin(SC), Run like this : `ruby bittrex_bot.rb "SC" "2"`
+      e.g For Siacoin(SC), Run like this : `python bittrex_bot.py "SC" "2"`
 
 3. **BUY_AND_SELL BOT** which purchase the coin at minimum price and place the sell order at increment profits, BOT_TYPE=3
-      e.g For Siacoin(SC), Run like this : `ruby bittrex_bot.rb "SC" "3"`
+      e.g For Siacoin(SC), Run like this : `python bittrex_bot.py "SC" "3"`
 
 4. **SELL_AT_ANY_COST BOT** which cancel all the open orders and sell the coin at breakeven or in loss to make an exit from the pump in case of unexpected scenario, BOT_TYPE=4
-     e.g For Siacoin(SC), Run like this : `ruby bittrex_bot.rb "SC" "4"`
+     e.g For Siacoin(SC), Run like this : `python bittrex_bot.py "SC" "4"`
 
 5. **BUY_ALL BOT** which purchases all the low volume ( < 50) coins on Bittrex, taking care of coin not being prepumped, BOT_TYPE=5
-      e.g For Siacoin(SC), Run like this : `ruby bittrex_bot.rb "OPTIONAL" "5"`
+      e.g For Siacoin(SC), Run like this : `python bittrex_bot.py "OPTIONAL" "5"`
 
 6. **SELL_ALL BOT** which place sell orders against all low volume coins purchased by BOT-5 at given profit( by default **20%**) , BOT_TYPE=6
-      e.g For Siacoin(SC), Run like this : `ruby bittrex_bot.rb "OPTIONAL" "6"`
+      e.g For Siacoin(SC), Run like this : `python bittrex_bot.py "OPTIONAL" "6"`
 
 7. **CANCEL_ALL BOT** which cancel all open orders across all BTC cryptocurrency pairs on Bittrex, BOT_TYPE=7
-     e.g For Siacoin(SC), Run like this : `ruby bittrex_bot.rb "OPTIONAL" "7"`
+     e.g For Siacoin(SC), Run like this : `python bittrex_bot.py "OPTIONAL" "7"`
 
 **Tuning of Parameters in Bot Script:**
 
-1. Open **bittrex_bot.rb**, navigate to the end of file :  Change these lines according to the instructions below => 
+1. Open **bittrex_bot.py**, navigate to the end of file :  Change these lines according to the instructions below => 
 
 ```
 buy_bot(0.05, 0.006, 0.5) if BOT_TYPE == 1
