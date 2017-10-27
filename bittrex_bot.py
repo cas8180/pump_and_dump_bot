@@ -309,29 +309,3 @@ if BOT_TYPE == 5: buy_all_bot(0.05, 0.006, 0.5)
 if BOT_TYPE == 6: sell_all_bot(0.2) 
 if BOT_TYPE == 7: cancel_all_bot 
 
-
-
-
-
-
-
-
-
-
-
-
-# print Fore.GREEN + "URL Created: " + get_url(URI_market,action="buy",quantity=2,rate=0.05, market="BTC-ETH") + Fore.WHITE
-
-# url = get_url(URI_account, action="balance")
-# print url
-# print call_secret_api(url)
-#print call_api(url)
-
-# low_24_hr, last_price, ask_price, volume = get_market_summary("BTC-ETH")
-# print low_24_hr, last_price, ask_price, volume
-
-# response = requests.get(url, verify=False, headers={'apisign': hmac_sha256(url, API_SECRET)})
-# #print response
-# data = response.json()
-# print (Fore.CYAN + str(data["success"]) + " " +
-#        str(data["message"]) + " " + str(data["result"]))
