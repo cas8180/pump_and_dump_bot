@@ -13,9 +13,9 @@ BASE_URL = "https://bittrex.com/api/v1.1/"
 API_KEY = "<API-KEY-HERE>"
 API_SECRET = "<API=SECRET-HERE>"
 units_bought = 0
-currency = sys.argv[0]
+currency = sys.argv[1]
 market_name = "BTC-" + currency
-BOT_TYPE = int(sys.argv[1])
+BOT_TYPE = int(sys.argv[2])
 
 
 # Helper classes that define static properties for common api paths
