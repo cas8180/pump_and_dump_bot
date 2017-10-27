@@ -100,7 +100,7 @@ def call_secret_api(url):
   #print response
   parsed_body = response.json()
   #p [url, parsed_body]
-  print Fore.GREEN + "Success" if parsed_body["success"] is True else Fore.RED + "Failed"
+  print Fore.GREEN + "Success" if parsed_body["success"] is True else Fore.RED + "Failed: " +  parsed_body["message"]
   if parsed_body["success"] is True:
       return parsed_body["result"] 
 
@@ -207,6 +207,7 @@ def buy_all_bot(percent_increase = 0.05, chunk = 0.006, prepump_buffer = 0.5):
   markets_url = get_url(URI_public, action = "markets")
   markets = call_api(markets_url)
   global currency
+  global market_name
   for market in markets:
     currency = market["MarketCurrency"]
     base_currency = market["BaseCurrency"]
@@ -320,6 +321,7 @@ if BOT_TYPE == 4: sell_at_any_cost(0.3)
 if BOT_TYPE == 5: buy_all_bot(0.05, 0.006, 0.5) 
 if BOT_TYPE == 6: sell_all_bot(0.2) 
 if BOT_TYPE == 7: cancel_all_bot 
+
 
 
 
