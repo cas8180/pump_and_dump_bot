@@ -48,7 +48,7 @@ class URI_market:
     open_orders = "market/getopenorders?market=%s"
 
 
-def hmac_sha512(str, key):
+def hmac_sha512(url, key):
     digest = hmac.new(API_SECRET, url, hashlib.sha512).hexdigest()
     return digest
 
@@ -57,6 +57,7 @@ def hmac_sha512(str, key):
 
 def get_url(api_type, **params):
     """This funtion gets the REST url for a given api type + params"""
+    global BASE_URL
     url = BASE_URL + getattr(api_type, params["action"])
     if params["action"] == "buy" or params["action"] == "sell":
         # sprintf(url, params[:market], params[:quantity], params[:rate])
@@ -108,9 +109,11 @@ def cancel_all_bot():
   """ method to cancel all open BTC pair orders on bittrex"""
   markets_url = get_url(URI_public, action = "markets")
   markets = call_api(markets_url)
+  global currency
   for market in markets:
     currency = market["MarketCurrency"]
     base_currency = market["BaseCurrency"]
+    global market_name
     market_name = market["MarketName"]
     if market["IsActive"] and base_currency == "BTC":
       open_orders_url = get_url(URI_market, action = "open_orders", market = market_name)
@@ -129,9 +132,11 @@ def sell_all_bot(profit_rate = 0.2):
   markets_url = get_url(URI_public, action = "markets")
   markets = call_api(markets_url)
   expected_worth = 0.0
+  global currency
   for market in markets:
     currency = market["MarketCurrency"]
     base_currency = market["BaseCurrency"]
+    global market_name
     market_name = market["MarketName"]
     if market["IsActive"] and base_currency == "BTC":
       get_balance_url = get_url(URI_account, action = "currency_balance", currency = currency)
@@ -173,7 +178,7 @@ def buy_chunk(last_price, market_name, percent_increase, chunk):
     order = call_secret_api(buy_limit_url)
     print Fore.GREEN + "Success" if order is not None and order["uuid"] is not None else Fore.RED + "Fail"
     cnt += 1
-
+  global units_bought
   units_bought = quantity if order is not None and order["uuid"] is not None else 0
   return order
 
@@ -183,6 +188,7 @@ def buy_chunk(last_price, market_name, percent_increase, chunk):
 # chunk(float) - Amount of BTC to invest for buying altcoin i.e BUY IF [last_price < (1.0 + prepump_buffer)*low_24_hr]
 # prepump_buffer(float) -  Allowed buffer for prepump
 def buy_bot(percent_increase = 0.05, chunk = 0.006, prepump_buffer = 0.5):
+  global market_name
   market_name = market_name
   low_24_hr, last_price, ask_price, volume = get_market_summary(market_name)
   total_spent = 0.0
@@ -200,6 +206,7 @@ def buy_bot(percent_increase = 0.05, chunk = 0.006, prepump_buffer = 0.5):
 def buy_all_bot(percent_increase = 0.05, chunk = 0.006, prepump_buffer = 0.5):
   markets_url = get_url(URI_public, action = "markets")
   markets = call_api(markets_url)
+  global currency
   for market in markets:
     currency = market["MarketCurrency"]
     base_currency = market["BaseCurrency"]
@@ -212,9 +219,11 @@ def buy_all_bot(percent_increase = 0.05, chunk = 0.006, prepump_buffer = 0.5):
 # params:
 # percent_decrease(float) - BUY price will be percent_decrease of last_price of the market, eg. SELL_PRICE = (1.0 - percent_decrease)*last_price
 def sell_bot(percent_decrease = 0.1):
+  global market_name
   market_name = market_name
+  global currency
   currency = currency
-  low_24_hr, last_price, ask_price = get_market_summary(market_name)
+  low_24_hr, last_price, ask_price, volume = get_market_summary(market_name)
   sell_price = last_price - percent_decrease*last_price
   get_balance_url = get_url(URI_account, action = "currency_balance", currency = currency)
   balance_details = call_secret_api(get_balance_url)
@@ -247,9 +256,11 @@ def sell_bot(percent_decrease = 0.1):
 # profit(float) -> SELL_PRICE = (1.0 + profit) * BUY_PRICE
 # splits(int) -> How many splits of available quantity you want to make [profit] increment each time in next sell order
 def buy_sell_bot(percent_increase = 0.05, chunk = 0.004, prepump_buffer = 0.5, profit = 0.2, splits = 2, no_of_retries = 10):
+  global market_name
   market_name = market_name
+  global currency
   currency = currency
-  low_24_hr, last_price, ask_price = get_market_summary(market_name)
+  low_24_hr, last_price, ask_price, volume = get_market_summary(market_name)
   total_spent = 0.0
   print {"low_24_hr" : low_24_hr, "last_price" : last_price, "ask_price" : ask_price}
   if last_price < (1.0 + prepump_buffer)*low_24_hr: #last_price is smaller than 50% increase since yerterday
@@ -262,7 +273,7 @@ def buy_sell_bot(percent_increase = 0.05, chunk = 0.004, prepump_buffer = 0.5, p
       print balance_details
       if balance_details and balance_details["Available"] and balance_details["Available"] > 0.0: # available coins present
         qty = balance_details["Available"]/splits
-        for i in range(splits.times):
+        for i in range(splits):
           qty += (int(balance_details["Available"]) % splits) if (i-1 == splits) else 0
           sell_price = buy_price + buy_price * (profit * (i+1))
           sell_price = "%.8f" % sell_price
@@ -288,6 +299,7 @@ def buy_sell_bot(percent_increase = 0.05, chunk = 0.004, prepump_buffer = 0.5, p
 # params:
 # percent_decrease(float) - BUY price will be percent_decrease of last_price of the market, eg. SELL_PRICE = (1.0 - percent_decrease)*last_price
 def sell_at_any_cost(percent_decrease = 0.3):
+  global market_name
   market_name = market_name
   open_orders_url = get_url(URI_market, action = "open_orders", market = market_name)
   open_orders = call_secret_api(open_orders_url)
@@ -300,7 +312,7 @@ def sell_at_any_cost(percent_decrease = 0.3):
   sell_order = sell_bot(percent_decrease)
 
 
-
+global BOT_TYPE
 if BOT_TYPE == 1: buy_bot(0.05, 0.006, 0.5)
 if BOT_TYPE == 2: sell_order = sell_bot(0.1) 
 if BOT_TYPE == 3: buy_sell_bot(0.05, 0.012, 0.5, 0.1, 2) 
@@ -308,4 +320,6 @@ if BOT_TYPE == 4: sell_at_any_cost(0.3)
 if BOT_TYPE == 5: buy_all_bot(0.05, 0.006, 0.5) 
 if BOT_TYPE == 6: sell_all_bot(0.2) 
 if BOT_TYPE == 7: cancel_all_bot 
+
+
 
